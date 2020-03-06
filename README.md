@@ -45,11 +45,36 @@ plugins:
   doulba/prow-release:
   - size
   - trigger
+```
 
-external_plugins:
+### Config
+
+```yaml
+prowjob_namespace: platform
+pod_namespace: test-pods
+log_level: debug
+
+postsubmits:
   doulba/prow-release:
   - name: nightly-released
-    endpoint: https://jekins-url/job/prow/job/release/build?token=<git-token>
-    events:
-    - create
+    branches:
+    - ^release-$
+    - ^v(\d+\.)?(\d+\.)?(\*|\d+)$
+    spec:
+      containers:
+      - image: curlimages/curl
+        command: ['curl','-X','POST','https://<JENKINS_URL>/job/prow/job/release/buildWithParameters?NUXEO_VERSION=$(PULL_BASE_REF)', '-u', '$(JENKINS_USER):$(JENKINS_PASSWORD)']
+        env:
+          - name: JENKINS_USER
+            valueFrom:
+              secretKeyRef:
+                name: jenkins-token
+                key: username
+          - name: JENKINS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: jenkins-token
+                key: password
+        securityContext:
+          privileged: true
 ```
