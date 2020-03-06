@@ -29,3 +29,27 @@ kubectl create secret generic oauth-token --from-file=oauth=<FULL_PATH>/github-o
 ```bash
 kubectl apply -f <FULL_PATH>/prow/cluster/starter.yaml
 ```
+
+
+### Plugins
+
+```yaml
+---
+triggers:
+- repos:
+  - doulba/prow-release
+  only_org_members: true
+
+
+plugins:
+  doulba/prow-release:
+  - size
+  - trigger
+
+external_plugins:
+  doulba/prow-release:
+  - name: nightly-released
+    endpoint: https://jekins-url/job/prow/job/release/build?token=<git-token>
+    events:
+    - create
+```
